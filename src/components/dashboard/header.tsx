@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { Bell, ChevronDown, Search, User } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Bell, ChevronDown, Search, User, Settings as SettingsIcon, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -27,7 +28,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-card px-4 lg:px-6">
+    <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-white dark:bg-slate-950 px-4 lg:px-6">
       <div className="flex flex-1 items-center gap-4">
         <div className="relative w-full max-w-md">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -117,10 +118,10 @@ export function Header() {
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage src="" />
-                <AvatarFallback>AD</AvatarFallback>
+                <AvatarFallback>JM</AvatarFallback>
               </Avatar>
               <div className="hidden text-left md:block">
-                <p className="text-sm font-medium">Admin User</p>
+                <p className="text-sm font-medium">Jonathan Mills</p>
                 <p className="text-xs text-muted-foreground">
                   admin@example.com
                 </p>
@@ -136,7 +137,7 @@ export function Header() {
               Profile
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
+              <SettingsIcon className="mr-2 h-4 w-4" />
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />

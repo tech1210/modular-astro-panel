@@ -11,7 +11,7 @@ interface DataCardProps {
 
 export function DataCard({ title, description, children, className }: DataCardProps) {
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    <Card className={cn("overflow-hidden bg-white", className)}>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}

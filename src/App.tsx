@@ -26,11 +26,20 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/customers" element={<Customers />} />
-            <Route path="/products" element={<Dashboard />} />
+            <Route path="/projects" element={<Dashboard />} />
+            <Route path="/projects-description" element={<Dashboard />} />
+            <Route path="/reports" element={<Dashboard />} />
+            <Route path="/crypto" element={<Dashboard />} />
+            <Route path="/ecommerce" element={<Dashboard />} />
+            <Route path="/ui-elements" element={<Dashboard />} />
+            <Route path="/utilities" element={<Dashboard />} />
+            <Route path="/forms" element={<Dashboard />} />
             <Route path="/orders" element={<Dashboard />} />
             <Route path="/invoices" element={<Dashboard />} />
             <Route path="/calendar" element={<Dashboard />} />
             <Route path="/notifications" element={<Dashboard />} />
+            <Route path="/advanced-ui" element={<Dashboard />} />
+            <Route path="/apps" element={<Dashboard />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<NotFound />} />

@@ -1,344 +1,375 @@
 
-import { ResponsiveContainer, BarChart, Bar, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
-import { Users, ShoppingCart, CreditCard, ArrowUpRight, ArrowDownRight, Package, DollarSign, Calendar, Bell } from "lucide-react";
-import { StatCard } from "@/components/dashboard/stat-card";
+import { useState } from "react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from "recharts";
+import {
+  Users,
+  ShoppingCart,
+  DollarSign,
+  FileText,
+  Calendar,
+  Share2,
+  Download,
+  ArrowRight,
+  ChevronRight,
+} from "lucide-react";
 import { DataCard } from "@/components/dashboard/data-card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
-// Mock data
-const revenueData = [
-  { name: "Jan", value: 4000 },
-  { name: "Feb", value: 3000 },
-  { name: "Mar", value: 2000 },
-  { name: "Apr", value: 2780 },
-  { name: "May", value: 1890 },
-  { name: "Jun", value: 2390 },
-  { name: "Jul", value: 3490 },
-  { name: "Aug", value: 4000 },
-  { name: "Sep", value: 3200 },
-  { name: "Oct", value: 2800 },
-  { name: "Nov", value: 3300 },
-  { name: "Dec", value: 4200 },
-];
-
-const salesData = [
-  { name: "Jan", revenue: 4000, orders: 240 },
-  { name: "Feb", revenue: 3000, orders: 138 },
-  { name: "Mar", revenue: 2000, orders: 98 },
-  { name: "Apr", revenue: 2780, orders: 120 },
-  { name: "May", revenue: 1890, orders: 85 },
-  { name: "Jun", revenue: 2390, orders: 114 },
-];
-
-const productPerformance = [
-  { name: "Product A", value: 400 },
-  { name: "Product B", value: 300 },
-  { name: "Product C", value: 300 },
-  { name: "Product D", value: 200 },
-];
-
-const COLORS = ["#6E59A5", "#0EA5E9", "#84cc16", "#facc15"];
-
-const recentOrders = [
-  { id: "#ORD-001", customer: "John Doe", date: "Apr 24, 2023", status: "Delivered", amount: "$345.00" },
-  { id: "#ORD-002", customer: "Jane Smith", date: "Apr 22, 2023", status: "Processing", amount: "$145.00" },
-  { id: "#ORD-003", customer: "Robert Johnson", date: "Apr 21, 2023", status: "Pending", amount: "$435.00" },
-  { id: "#ORD-004", customer: "Emily Davis", date: "Apr 20, 2023", status: "Delivered", amount: "$250.00" },
-  { id: "#ORD-005", customer: "Michael Brown", date: "Apr 19, 2023", status: "Cancelled", amount: "$550.00" },
-];
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Delivered":
-      return "success";
-    case "Processing":
-      return "primary";
-    case "Pending":
-      return "warning";
-    case "Cancelled":
-      return "destructive";
-    default:
-      return "secondary";
+// Data for stats cards
+const statsData = [
+  {
+    title: "Active Clients",
+    value: "25K",
+    icon: <Users className="h-6 w-6" />,
+    color: "text-blue-500",
+    bgColor: "bg-blue-100",
+    change: {
+      value: 0.35,
+      isPositive: true
+    }
+  },
+  {
+    title: "Total Revenue",
+    value: "$365",
+    icon: <DollarSign className="h-6 w-6" />,
+    color: "text-amber-500",
+    bgColor: "bg-amber-100",
+    change: {
+      value: 0.54,
+      isPositive: false
+    }
+  },
+  {
+    title: "Total Sales",
+    value: "1,589",
+    icon: <ShoppingCart className="h-6 w-6" />,
+    color: "text-emerald-500",
+    bgColor: "bg-emerald-100",
+    change: {
+      value: 0.96,
+      isPositive: true
+    }
+  },
+  {
+    title: "Total Deals",
+    value: "256",
+    icon: <DollarSign className="h-6 w-6" />,
+    color: "text-rose-500",
+    bgColor: "bg-rose-100",
+    change: {
+      value: 0.42,
+      isPositive: false
+    }
+  },
+  {
+    title: "Total Projects",
+    value: "46",
+    icon: <FileText className="h-6 w-6" />,
+    color: "text-cyan-500",
+    bgColor: "bg-cyan-100",
+    change: {
+      value: 0.42,
+      isPositive: true
+    }
   }
-};
-
-const topProducts = [
-  { id: 1, name: "Wireless Headphones", sales: 245, stock: 45, price: "$149.99" },
-  { id: 2, name: "Smart Watch", sales: 186, stock: 32, price: "$299.99" },
-  { id: 3, name: "Bluetooth Speaker", sales: 152, stock: 0, price: "$89.99" },
-  { id: 4, name: "Laptop Pro", sales: 132, stock: 12, price: "$1299.99" },
 ];
 
+// Mock data for charts
+const monthlyData = [
+  { name: "Jan", value: 20 },
+  { name: "Feb", value: 35 },
+  { name: "Mar", value: 30 },
+  { name: "Apr", value: 45 },
+  { name: "May", value: 25 },
+  { name: "Jun", value: 55 },
+  { name: "Jul", value: 35 },
+  { name: "Aug", value: 40 },
+  { name: "Sep", value: 65 },
+  { name: "Oct", value: 40 },
+  { name: "Nov", value: 55 },
+  { name: "Dec", value: 35 },
+];
+
+const lastMonthData = [
+  { name: "Jan", value: 15 },
+  { name: "Feb", value: 25 },
+  { name: "Mar", value: 20 },
+  { name: "Apr", value: 35 },
+  { name: "May", value: 15 },
+  { name: "Jun", value: 45 },
+  { name: "Jul", value: 25 },
+  { name: "Aug", value: 30 },
+  { name: "Sep", value: 55 },
+  { name: "Oct", value: 30 },
+  { name: "Nov", value: 45 },
+  { name: "Dec", value: 25 },
+];
+
+// Upcoming events data
+const upcomingEvents = [
+  {
+    title: "Strategy Planning",
+    date: "16 Aug",
+    day: "Tue",
+    description: "Duo et et rebum kasd talk",
+  },
+  {
+    title: "Hiring Employees",
+    date: "18 Aug",
+    day: "Thu",
+    description: "Accusam diam est eos vel",
+  },
+];
+
+// Welcome message state
 const Dashboard = () => {
+  const [showWelcome, setShowWelcome] = useState(true);
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <div className="flex gap-2">
-          <Button variant="outline">Download Report</Button>
-          <Button>
-            <ArrowUpRight className="mr-2 h-4 w-4" />
-            View Analytics
-          </Button>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">CRM Admin Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <span className="text-blue-600">CRM</span>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          <span className="text-muted-foreground">Dashboard</span>
         </div>
       </div>
 
-      <div className="grid-stats">
-        <StatCard 
-          title="Total Revenue" 
-          value="$45,231.89" 
-          trend={{ value: 20.5, isPositive: true }}
-          description="Revenue this month"
-          icon={DollarSign}
-          variant="primary"
-        />
-        <StatCard 
-          title="New Customers" 
-          value="2,845" 
-          trend={{ value: 15.2, isPositive: true }}
-          description="New users this month"
-          icon={Users}
-          variant="success"
-        />
-        <StatCard 
-          title="Orders" 
-          value="1,456" 
-          trend={{ value: 5.1, isPositive: false }}
-          description="Orders this month"
-          icon={ShoppingCart}
-          variant="warning"
-        />
-        <StatCard 
-          title="Active Products" 
-          value="456" 
-          trend={{ value: 12.5, isPositive: true }}
-          description="Products in inventory"
-          icon={Package}
-          variant="destructive"
-        />
-      </div>
+      {showWelcome && (
+        <div className="relative rounded-md bg-blue-50 p-4">
+          <button
+            onClick={() => setShowWelcome(false)}
+            className="absolute right-2 top-2 rounded-full bg-white p-1 text-gray-500 hover:bg-gray-100"
+          >
+            <span className="text-lg">×</span>
+          </button>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center">
+            <div className="flex-shrink-0">
+              <img
+                src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%220%200%2064%2064%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20fill%3D%22%234285F4%22%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%2232%22%2F%3E%3Cpath%20d%3D%22M17.17%2033.99l9.46-16.37c.43-.75%201.53-.75%201.95%200l9.46%2016.37c.43.75-.11%201.68-.97%201.68H18.15c-.86%200-1.39-.93-.98-1.68z%22%20fill%3D%22%23FFF%22%2F%3E%3Cpath%20d%3D%22M29.41%2017.62l9.46%2016.37c.43.75-.11%201.68-.97%201.68h-9.46%22%20fill%3D%22%23EAEAEA%22%2F%3E%3Cpath%20d%3D%22M38.22%2039.78L28.76%2056.15c-.43.75-1.53.75-1.95%200l-9.46-16.37c-.43-.75.11-1.68.97-1.68h18.92c.86%200%201.4.93.98%201.68z%22%20fill%3D%22%23FFF%22%2F%3E%3Cpath%20d%3D%22M37.24%2038.1h-9.46l-9.46%2016.36c-.43.75.11%201.69.97%201.69h18.92c.86%200%201.41-.94.98-1.69L37.24%2038.1z%22%20fill%3D%22%23EAEAEA%22%2F%3E%3Cpath%20d%3D%22M26.53%2033.99l-9.46-16.37c-.43-.75.11-1.68.97-1.68h18.92c.86%200%201.4.93.98%201.68l-9.46%2016.37c-.42.75-1.52.75-1.95%200z%22%20fill%3D%22%23DADADA%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+                alt="Welcome"
+                className="h-20 w-20"
+              />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Welcome back! Dashlot</h2>
+              <p className="text-gray-600">Want to be the first to know about Dashlot updates? Subscribe Now!</p>
+            </div>
+            <div className="ml-auto">
+              <Button className="bg-rose-500 hover:bg-rose-600">Upgrade Account</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DataCard 
-          title="Revenue Overview" 
-          description="Monthly revenue trends"
-          className="lg:col-span-2"
-        >
-          <Tabs defaultValue="monthly">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {statsData.map((stat, index) => (
+          <div key={index} className="rounded-lg border bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <TabsList>
-                <TabsTrigger value="weekly">Weekly</TabsTrigger>
-                <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                <TabsTrigger value="yearly">Yearly</TabsTrigger>
-              </TabsList>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">{stat.title}</p>
+                <p className="text-2xl font-bold">{stat.value}</p>
+              </div>
+              <div className={cn("rounded-full p-2", stat.bgColor)}>
+                <div className={stat.color}>{stat.icon}</div>
+              </div>
             </div>
-            <TabsContent value="monthly" className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="value" stroke="#6E59A5" strokeWidth={2} dot={{ stroke: '#6E59A5', strokeWidth: 2, r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </TabsContent>
-            <TabsContent value="weekly" className="h-[300px]">
-              <div className="flex h-full items-center justify-center">
-                <p className="text-sm text-muted-foreground">Weekly data not available</p>
+            <div className="mt-4">
+              <div className="h-12">
+                {index === 0 && (
+                  <svg viewBox="0 0 100 20" className="w-full h-full text-blue-500">
+                    <path
+                      d="M0,10 L10,15 L20,5 L30,10 L40,0 L50,10 L60,5 L70,10 L80,5 L90,15 L100,10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                )}
+                {index === 1 && (
+                  <svg viewBox="0 0 100 20" className="w-full h-full text-amber-500">
+                    <path
+                      d="M0,10 L10,5 L20,15 L30,10 L40,15 L50,5 L60,10 L70,5 L80,15 L90,10 L100,5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                )}
+                {index === 2 && (
+                  <svg viewBox="0 0 100 20" className="w-full h-full text-emerald-500">
+                    <path
+                      d="M0,15 L10,10 L20,12 L30,8 L40,10 L50,5 L60,8 L70,5 L80,8 L90,3 L100,5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                )}
+                {index === 3 && (
+                  <svg viewBox="0 0 100 20" className="w-full h-full text-rose-500">
+                    <path
+                      d="M0,5 L10,8 L20,5 L30,12 L40,8 L50,15 L60,10 L70,12 L80,5 L90,10 L100,8"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                )}
+                {index === 4 && (
+                  <svg viewBox="0 0 100 20" className="w-full h-full text-cyan-500">
+                    <path
+                      d="M0,10 L10,5 L20,8 L30,3 L40,10 L50,5 L60,12 L70,8 L80,15 L90,8 L100,12"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                )}
               </div>
-            </TabsContent>
-            <TabsContent value="yearly" className="h-[300px]">
-              <div className="flex h-full items-center justify-center">
-                <p className="text-sm text-muted-foreground">Yearly data not available</p>
+              <div className="mt-1 flex items-center text-xs">
+                <span className={cn(
+                  "flex items-center",
+                  stat.change.isPositive ? "text-emerald-500" : "text-rose-500"
+                )}>
+                  {stat.change.isPositive ? "+" : "-"}{Math.abs(stat.change.value)}%
+                </span>
+                <span className="ml-1 text-muted-foreground">Since Last Month</span>
               </div>
-            </TabsContent>
-          </Tabs>
-        </DataCard>
-
-        <DataCard 
-          title="Product Performance" 
-          description="Top products by sales"
-        >
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={productPerformance}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={2}
-                  dataKey="value"
-                  label={(entry) => entry.name}
-                  labelLine={false}
-                >
-                  {productPerformance.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            </div>
           </div>
-        </DataCard>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DataCard 
-          title="Sales Analytics" 
-          description="Revenue vs Orders"
-          className="lg:col-span-2"
-        >
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={salesData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" />
-                <YAxis yAxisId="left" orientation="left" stroke="#6E59A5" />
-                <YAxis yAxisId="right" orientation="right" stroke="#0EA5E9" />
-                <Tooltip />
-                <Bar yAxisId="left" dataKey="revenue" fill="#6E59A5" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="right" dataKey="orders" fill="#0EA5E9" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </DataCard>
-
-        <DataCard 
-          title="Recent Activity" 
-          description="Latest system events"
-        >
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-primary/10 p-2 text-primary">
-                <Users className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">New user registered</p>
-                <p className="text-xs text-muted-foreground">5 mins ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-success/10 p-2 text-success">
-                <ShoppingCart className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">New order placed</p>
-                <p className="text-xs text-muted-foreground">15 mins ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-warning/10 p-2 text-warning">
-                <Package className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Low stock alert</p>
-                <p className="text-xs text-muted-foreground">30 mins ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-destructive/10 p-2 text-destructive">
-                <CreditCard className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Payment failed</p>
-                <p className="text-xs text-muted-foreground">1 hour ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-muted p-2 text-muted-foreground">
-                <Bell className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">System update completed</p>
-                <p className="text-xs text-muted-foreground">2 hours ago</p>
-              </div>
-            </div>
-          </div>
-          <Button variant="outline" className="mt-4 w-full">View All Activity</Button>
-        </DataCard>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <DataCard 
-          title="Recent Orders" 
-          description="Latest 5 orders in the system"
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="border-b py-2 text-left text-sm font-medium text-muted-foreground">Order ID</th>
-                  <th className="border-b py-2 text-left text-sm font-medium text-muted-foreground">Customer</th>
-                  <th className="border-b py-2 text-left text-sm font-medium text-muted-foreground">Date</th>
-                  <th className="border-b py-2 text-left text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="border-b py-2 text-right text-sm font-medium text-muted-foreground">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.map((order, index) => (
-                  <tr key={index} className="hover:bg-muted/50">
-                    <td className="py-3 text-sm font-medium">{order.id}</td>
-                    <td className="py-3 text-sm">{order.customer}</td>
-                    <td className="py-3 text-sm text-muted-foreground">{order.date}</td>
-                    <td className="py-3 text-sm">
-                      <Badge variant={getStatusColor(order.status) as any}>
-                        {order.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3 text-right text-sm font-medium">{order.amount}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <Button variant="outline" className="mt-4 w-full">View All Orders</Button>
-        </DataCard>
-
-        <DataCard 
-          title="Top Products" 
-          description="Best selling products this month"
-        >
-          <div className="space-y-4">
-            {topProducts.map((product) => (
-              <div key={product.id} className="flex justify-between border-b pb-3 last:border-0">
-                <div>
-                  <p className="font-medium">{product.name}</p>
-                  <div className="mt-1 flex items-center gap-2">
-                    <Badge variant="outline">{product.sales} sales</Badge>
-                    {product.stock === 0 ? (
-                      <Badge variant="destructive">Out of stock</Badge>
-                    ) : product.stock < 20 ? (
-                      <Badge variant="warning">Low stock</Badge>
-                    ) : (
-                      <Badge variant="success">In stock</Badge>
-                    )}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-7">
+        <div className="lg:col-span-5">
+          <DataCard title="Revenue Statistics" className="h-full">
+            <div className="mb-4 flex items-center justify-between">
+              <Tabs defaultValue="thisMonth" className="w-full">
+                <div className="flex items-center justify-between">
+                  <TabsList>
+                    <TabsTrigger value="thisMonth">This Month</TabsTrigger>
+                    <TabsTrigger value="lastMonth">Last Month</TabsTrigger>
+                  </TabsList>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex items-center gap-1">
+                      <Download className="h-4 w-4" />
+                      <span>Export</span>
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex items-center gap-1">
+                      <Share2 className="h-4 w-4" />
+                      <span>Share</span>
+                    </Button>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">{product.price}</p>
-                  <div className="mt-1 flex items-center justify-end gap-1">
-                    {product.stock > 0 ? (
-                      <>
-                        <Progress className="h-2 w-16" value={product.stock > 50 ? 100 : (product.stock * 2)} />
-                        <span className="text-xs text-muted-foreground">{product.stock}</span>
-                      </>
-                    ) : (
-                      <span className="text-xs text-destructive">0 left</span>
-                    )}
+                <TabsContent value="thisMonth" className="mt-4 h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={monthlyData}
+                      margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+                    >
+                      <CartesianGrid stroke="#f5f5f5" vertical={false} />
+                      <XAxis
+                        dataKey="name"
+                        axisLine={false}
+                        tickLine={false}
+                        tickMargin={10}
+                      />
+                      <YAxis axisLine={false} tickLine={false} tickMargin={10} />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        name="This Month"
+                        stroke="#fbbf24"
+                        strokeWidth={3}
+                        dot={{ stroke: '#fbbf24', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 8 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </TabsContent>
+                <TabsContent value="lastMonth" className="mt-4 h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={lastMonthData}
+                      margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+                    >
+                      <CartesianGrid stroke="#f5f5f5" vertical={false} />
+                      <XAxis
+                        dataKey="name"
+                        axisLine={false}
+                        tickLine={false}
+                        tickMargin={10}
+                      />
+                      <YAxis axisLine={false} tickLine={false} tickMargin={10} />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        name="Last Month"
+                        stroke="#3b82f6"
+                        strokeWidth={3}
+                        dot={{ stroke: '#3b82f6', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 8 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </DataCard>
+        </div>
+
+        <div className="lg:col-span-2">
+          <DataCard title="Upcoming Events" className="h-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-sm font-medium">Upcoming Events</h3>
+              <Button variant="link" size="sm" className="flex items-center gap-1 text-sm text-blue-600 p-0">
+                Show All
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {upcomingEvents.map((event, index) => (
+                <div key={index} className="flex gap-3">
+                  <div className="flex-shrink-0 flex flex-col items-center">
+                    <div className="bg-blue-100 text-blue-600 rounded px-2 py-1 text-xs font-semibold">
+                      {event.day}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">{event.date}</div>
+                  </div>
+                  <div className="flex-grow border-b pb-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium">{event.title}</h4>
+                      <Button variant="ghost" size="icon" className="h-6 w-6">
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{event.description}</p>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          <Button variant="outline" className="mt-4 w-full">View All Products</Button>
-        </DataCard>
+              ))}
+            </div>
+          </DataCard>
+        </div>
       </div>
     </div>
   );
